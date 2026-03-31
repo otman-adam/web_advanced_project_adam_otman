@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Explorer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="dom.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>API Explorer</h1>
+
+    <!-- Zoek -->
+    <input type="text" placeholder="Zoek...">
+
+    <!-- Filter -->
+    <select>
+      <option>Alle status</option>
+      <option>Alive</option>
+      <option>Dead</option>
+      <option>Unknown</option>
+    </select>
+
+    <!-- Sort -->
+    <select>
+      <option>Naam A-Z</option>
+      <option>Naam Z-A</option>
+    </select>
+  </header>
+
+  <main>
+
+    <!-- Data weergave (voorbeeld statisch) -->
+    <section>
+
+      <article>
+        <img src="https://via.placeholder.com/150" alt="character">
+        <h3>Naam</h3>
+        <p>Status: Alive</p>
+        <p>Species: Human</p>
+        <p>Gender: Male</p>
+        <p>Origin: Earth</p>
+        <button>☆ Voeg toe</button>
+      </article>
+
+      <article>
+        <img src="https://via.placeholder.com/150" alt="character">
+        <h3>Naam</h3>
+        <p>Status: Dead</p>
+        <p>Species: Alien</p>
+        <p>Gender: Female</p>
+        <p>Origin: Mars</p>
+        <button>☆ Voeg toe</button>
+      </article>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Dynamic Web Project</p>
+  </footer>
+
+</body>
+</html>
