@@ -44,3 +44,30 @@ article p {
     font-size: 0.9rem;
     color: #555;
 }
+
+.favoritebutton {
+    margin: 10px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: #e0e0e0;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.favoritebutton:hover {
+    background: #d4d4d4;
+    transform: scale(1.05);
+}
+
+.favoritebutton.active {
+    background: #ff0077f9;
+    color: #000;
+    font-weight: bold;
+}
+
+.favoritebutton:active {
+    transform: scale(0.95);
+}

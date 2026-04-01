@@ -20,17 +20,35 @@ const renderCharacters = (characters) => {
     section.innerHTML = '';
 
     characters.forEach(character => {
-        const div = document.createElement('article');
-        div.innerHTML = `
+        const article = document.createElement('article');
+        const isFavorite = favorites.some(fav => fav.id === character.id);
+
+        article.innerHTML = `
         <a href="#"><img src="${character.image}" alt="Avatar van ${character.name}"></a>
         <h2>${character.name}</h2>
         <p>${character.status}</p>
         <p>${character.species}</p>
         <p>${character.gender}</p>
         <p>${character.location.name}</p>
-        <p>Komt voor in ${character.episode.length} aflevering(en)</p>`;
-        section.appendChild(div);
+        <p>Komt voor in ${character.episode.length} aflevering(en)</p>
+        <button class="favoritebutton ${isFavorite? "active": ""}" data-id="${character.id}"> ${isFavorite ? "Favorite" : "Not favorite"}</button>`;
+        section.appendChild(article);
     });
+
+    document.querySelectorAll('.favoritebutton').forEach(button => {
+    button.addEventListener('click', event => {
+        const id = parseInt(event.currentTarget.dataset.id);
+        const character = characters.find(c => c.id === id);
+        const isAlreadyFavorite = favorites.some(fav => fav.id === id);
+
+        if (isAlreadyFavorite) {
+            favorites = favorites.filter(fav => fav.id !== id);
+        } else {
+            favorites.push(character)
+        }
+        renderCharacters(characters)
+    })
+})
 }
 document.getElementById("zoekbalk").addEventListener('input', (event)=> {
     const zoekterm = document.getElementById("zoekbalk").value.toLowerCase();
@@ -81,6 +99,15 @@ document.getElementById("afkomst").addEventListener('change', (event) => {
         })
     }
     renderCharacters(gefilterd);
+})
+
+document.getElementById("showfavorite").addEventListener('change', (event) => {
+    const value = event.target.checked;
+    if (value) {
+        renderCharacters(favorites);
+    } else {
+        renderCharacters(characters);
+    }
 })
 
 fetchCharacters()
