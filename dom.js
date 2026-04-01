@@ -1,6 +1,14 @@
 
 let characters = [];
-let favorites = [];
+let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+const defaultFilters = {
+    zoekterm: "",
+    status: "all status",
+    sort: "no filter",
+    afkomst: "all",
+    favOnly: false
+};
 
 async function fetchCharacters() {
     fetch("https://rickandmortyapi.com/api/character")
@@ -8,18 +16,23 @@ async function fetchCharacters() {
       .then(data => {
         characters = data.results;
         console.log(characters);
-        renderCharacters(characters);
+        applyFilters();
       })
       .catch(error => {
         console.error("Er ging iets mis ", error);
       })
 }
 
-const renderCharacters = (characters) => {
+const renderCharacters = (newCharacters) => {
     const section = document.getElementById('my-section');
     section.innerHTML = '';
 
-    characters.forEach(character => {
+    if (newCharacters.length === 0) {
+        section.innerHTML = '<p id="geen-resultaten">Geen resultaten gevonden.</p>';
+        return;
+    }
+
+    newCharacters.forEach(character => {
         const article = document.createElement('article');
         const isFavorite = favorites.some(fav => fav.id === character.id);
 
@@ -33,81 +46,156 @@ const renderCharacters = (characters) => {
         <p>Komt voor in ${character.episode.length} aflevering(en)</p>
         <button class="favoritebutton ${isFavorite? "active": ""}" data-id="${character.id}"> ${isFavorite ? "Favorite" : "Not favorite"}</button>`;
         section.appendChild(article);
+
+        observer.observe(article);
     });
 
     document.querySelectorAll('.favoritebutton').forEach(button => {
-    button.addEventListener('click', event => {
-        const id = parseInt(event.currentTarget.dataset.id);
-        const character = characters.find(c => c.id === id);
-        const isAlreadyFavorite = favorites.some(fav => fav.id === id);
+        button.addEventListener('click', event => {
+            const id = parseInt(event.currentTarget.dataset.id);
+            const character = characters.find(c => c.id === id);
+            const isAlreadyFavorite = favorites.some(fav => fav.id === id);
 
-        if (isAlreadyFavorite) {
-            favorites = favorites.filter(fav => fav.id !== id);
-        } else {
-            favorites.push(character)
-        }
-        renderCharacters(characters)
-    })
-})
-}
-document.getElementById("zoekbalk").addEventListener('input', (event)=> {
-    const zoekterm = document.getElementById("zoekbalk").value.toLowerCase();
-    const gefilterd = characters.filter(character => {
-        return character.name.toLowerCase().includes(zoekterm) ||
-        character.status.toLowerCase().includes(zoekterm) ||
-        character.species.toLowerCase().includes(zoekterm) ||
-        character.gender.toLowerCase().includes(zoekterm) ||
-        character.location.name.toLowerCase().includes(zoekterm) 
-    })
-    renderCharacters(gefilterd)
-})
+            if (isAlreadyFavorite) {
+                favorites = favorites.filter(fav => fav.id !== id);
+            } else {
+                favorites.push(character)
+            }
 
-document.getElementById("status").addEventListener('change', (event) => {
-    const value = event.target.value.toLowerCase();
-    const gefilterd = characters.filter(character => {
-        return character.status.toLowerCase().includes(value)
-    })
-    if (value == "alle status") { 
-        renderCharacters(characters) 
-    }
-    else {
-        renderCharacters(gefilterd)
-    }
-})
+            localStorage.setItem('favorites', JSON.stringify(favorites));
 
-document.getElementById("sortAZ").addEventListener('change', (event) => {
-    const value = event.target.value.toLowerCase();
-    let gefilterd = [];
-    if (value == "naam a-z") {
-        gefilterd = [...characters].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (value == "naam z-a") {
-        gefilterd = [...characters].sort((a, b) => b.name.localeCompare(a.name));
-    } else {
-        gefilterd = [...characters];
-    }
-    renderCharacters(gefilterd)
-})
-
-document.getElementById("afkomst").addEventListener('change', (event) => {
-    const value = event.target.value.toLowerCase();
-    let gefilterd = [];
-    if (value == "alle") {
-        gefilterd = characters;
-    } else {
-        gefilterd = characters.filter(character => {
-            return character.location.name.toLowerCase().includes(value)
+            applyFilters()
         })
-    }
-    renderCharacters(gefilterd);
-})
+    })
+}
 
-document.getElementById("showfavorite").addEventListener('change', (event) => {
-    const value = event.target.checked;
-    if (value) {
-        renderCharacters(favorites);
-    } else {
-        renderCharacters(characters);
+function applyFilters() {
+    let result = [...characters];
+
+    const zoekterm = document.getElementById("zoekbalk").value.toLowerCase();
+    const status = document.getElementById("status").value.toLowerCase();
+    const sort = document.getElementById("sortAZ").value.toLowerCase();
+    const afkomst = document.getElementById("afkomst").value.toLowerCase();
+    const favOnly = document.getElementById("showfavorite").checked;
+
+    if (zoekterm) {
+        result = result.filter(character =>
+            character.name.toLowerCase().includes(zoekterm) ||
+            character.status.toLowerCase().includes(zoekterm) ||
+            character.species.toLowerCase().includes(zoekterm) ||
+            character.gender.toLowerCase().includes(zoekterm) ||
+            character.location.name.toLowerCase().includes(zoekterm)
+        );
     }
-})
+    if (status !== "all status") {
+        result = result.filter(c => c.status.toLowerCase() === status);
+    }
+    if (afkomst !== "all") {
+        result = result.filter(char => char.location.name.toLowerCase().includes(afkomst))
+    }
+    if (favOnly) {
+        result = result.filter(c => favorites.some(f => f.id === c.id));
+    }
+    if (sort === "name a-z") {
+        result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === "name z-a") {
+        result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    localStorage.setItem("filters", JSON.stringify({
+        zoekterm,
+        status,
+        sort,
+        afkomst,
+        favOnly
+    }));
+
+    renderCharacters(result)
+}
+
+const savedFilters = JSON.parse(localStorage.getItem("filters")) || defaultFilters;
+// if (savedFilters) {
+//     document.getElementById("zoekbalk").value = savedFilters.zoekterm || "";
+//     document.getElementById("status").value = savedFilters.status || "All status";
+//     document.getElementById("sortAZ").value = savedFilters.sort || "No Filter";
+//     document.getElementById("afkomst").value = savedFilters.afkomst || "All";
+//     document.getElementById("showfavorite").checked = savedFilters.favOnly || false;
+// }
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('zichtbaar');
+            observer.unobserve(entry.target);
+        }
+    });
+});
+
+// document.getElementById("zoekbalk").addEventListener('input', (event)=> {
+//     const zoekterm = document.getElementById("zoekbalk").value.toLowerCase();
+//     const gefilterd = characters.filter(character => {
+//         return character.name.toLowerCase().includes(zoekterm) ||
+//         character.status.toLowerCase().includes(zoekterm) ||
+//         character.species.toLowerCase().includes(zoekterm) ||
+//         character.gender.toLowerCase().includes(zoekterm) ||
+//         character.location.name.toLowerCase().includes(zoekterm) 
+//     })
+//     renderCharacters(gefilterd)
+// })
+
+// document.getElementById("status").addEventListener('change', (event) => {
+//     const value = event.target.value.toLowerCase();
+//     const gefilterd = characters.filter(character => {
+//         return character.status.toLowerCase().includes(value)
+//     })
+//     if (value == "all status") { 
+//         renderCharacters(characters) 
+//     }
+//     else {
+//         renderCharacters(gefilterd)
+//     }
+// })
+
+// document.getElementById("sortAZ").addEventListener('change', (event) => {
+//     const value = event.target.value.toLowerCase();
+//     let gefilterd = [];
+//     if (value == "name a-z") {
+//         gefilterd = [...characters].sort((a, b) => a.name.localeCompare(b.name));
+//     } else if (value == "name z-a") {
+//         gefilterd = [...characters].sort((a, b) => b.name.localeCompare(a.name));
+//     } else {
+//         gefilterd = [...characters];
+//     }
+//     renderCharacters(gefilterd)
+// })
+
+// document.getElementById("afkomst").addEventListener('change', (event) => {
+//     const value = event.target.value.toLowerCase();
+//     let gefilterd = [];
+//     if (value == "all") {
+//         gefilterd = characters;
+//     } else {
+//         gefilterd = characters.filter(character => {
+//             return character.location.name.toLowerCase().includes(value)
+//         })
+//     }
+//     renderCharacters(gefilterd);
+// })
+
+// document.getElementById("showfavorite").addEventListener('change', (event) => {
+//     const value = event.target.checked;
+//     if (value) {
+//         renderCharacters(favorites);
+//     } else {
+//         renderCharacters(characters);
+//     }
+// })
+
+document.getElementById("zoekbalk").addEventListener('input', applyFilters);
+document.getElementById("status").addEventListener('change', applyFilters);
+document.getElementById("sortAZ").addEventListener('change', applyFilters);
+document.getElementById("afkomst").addEventListener('change', applyFilters);
+document.getElementById("showfavorite").addEventListener('change', applyFilters);
+
 
 fetchCharacters()

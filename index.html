@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,14 +10,14 @@
 <body>
 
   <header>
-    <h1>API Explorer</h1>
+    <h1>Rick & Morty personages</h1>
 
     <!-- Zoek -->
     <input type="text" placeholder="Zoek..." id="zoekbalk">
 
     <!-- Filter -->
     <select id="status">
-      <option>Alle status</option>
+      <option>All status</option>
       <option>Alive</option>
       <option>Dead</option>
       <option>Unknown</option>
@@ -25,12 +25,12 @@
 
     <!-- Sort -->
     <select id="sortAZ">
-      <option>Geen Filter</option>
-      <option>Naam A-Z</option>
-      <option>Naam Z-A</option>
+      <option>No Filter</option>
+      <option>Name A-Z</option>
+      <option>Name Z-A</option>
     </select>
     <select id="afkomst">
-        <option>Alle</option>
+        <option>All</option>
         <option>Earth</option>
         <option>Citadel of Ricks</option>
         <option>Abadango</option>
@@ -42,6 +42,9 @@
     </select>
     <input type="checkbox" id="showfavorite">
     <label for="showfavorite">Show only favorite</label>
+
+    <!-- <button type="button" data-theme-toggle aria-label="Change to light theme">Change to light theme (or icon here)</button> -->
+     <button type="button" id="switch" data-theme-toggle>Change to light theme</button>
   </header>
 
   <main>
@@ -53,12 +56,14 @@
   </main>
 
   <footer>
-    <p>Web Project van Adam Otman - 2026</p>
+    <p>Web Project of Adam Otman - 2026</p>
   </footer>
 
 </body>
 </html>
 
-
+<!-- link conversatie met chatgpt voor het taak -->
 <!-- https://chatgpt.com/share/69cbfeb1-494c-8330-9ffd-0ed81c10347d -->
 
+<!-- link om dark en light theme te maken -->
+<!-- https://dev.to/whitep4nth3r/the-best-lightdark-mode-theme-toggle-in-javascript-368f -->
